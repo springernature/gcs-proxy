@@ -70,3 +70,66 @@ func TestShouldReturnAllTheObjectsAtSomePath(t *testing.T) {
 		Path: fmt.Sprintf("%s/file3", path),
 	})
 }
+
+func TestShouldReturnAllTheObjectsAtSomeEvenDeeperPath(t *testing.T) {
+	path := "subPath/subPathAgain"
+	objects := []fakestorage.Object{
+		{
+			BucketName: "bucket",
+			Name:       "file1",
+		},
+		{
+			BucketName: "bucket",
+			Name:       fmt.Sprintf("%s/file2", path),
+		},
+		{
+			BucketName: "bucket",
+			Name:       fmt.Sprintf("%s/file3", path),
+		},
+	}
+
+	server := fakestorage.NewServer(objects)
+	client := server.Client()
+
+	repo := gcs_proxy.NewRepository(client)
+
+	objs, err := repo.GetObjects(path)
+	assert.NoError(t, err)
+	assert.Contains(t, objs, gcs_proxy.Object{
+		Name: "file2",
+		Path: fmt.Sprintf("%s/file2", path),
+	})
+	assert.Contains(t, objs, gcs_proxy.Object{
+		Name: "file3",
+		Path: fmt.Sprintf("%s/file3", path),
+	})
+}
+//
+//func TestGetObjectShouldReturnTheContentOfTheObject(t *testing.T) {
+//	path := "subPath/subPathAgain/file2"
+//	expectedContent := "ImaFIIIIIIIIILE"
+//
+//	objects := []fakestorage.Object{
+//		{
+//			BucketName: "bucket",
+//			Name:       "file1",
+//		},
+//		{
+//			BucketName: "bucket",
+//			Name:       path,
+//			Content:    []byte(expectedContent),
+//		},
+//		{
+//			BucketName: "bucket",
+//			Name:       fmt.Sprintf("%s/file3", path),
+//		},
+//	}
+//
+//	server := fakestorage.NewServer(objects)
+//	client := server.Client()
+//
+//	repo := gcs_proxy.NewRepository(client)
+//
+//	//obj, err := repo.GetObject(path)
+//	//assert.NoError(t, err)
+//}

@@ -10,13 +10,13 @@ import (
 
 type StubRepository struct {
 	getObjects func(path string) ([]Object, error)
-	getObject  func(path string) []byte
+	getObject  func(path string) ([]byte, error)
 	isFile     func(path string) bool
 }
 
-func (s StubRepository) GetObject(path string) []byte {
+func (s StubRepository) GetObject(path string) ([]byte, error) {
 	if s.getObject == nil {
-		return []byte("")
+		return []byte(""), nil
 	}
 	return s.getObject(path)
 
@@ -79,9 +79,9 @@ func TestItRendersFilesWhenTraversing(t *testing.T) {
 
 	directoryPath := "/imADirectory"
 	directoryFiles := []Object{
-		{Name: "directoryFile1"},
-		{Name: "directoryFile2"},
-		{Name: "directoryFile3"},
+		{Path: "imADirectory/directoryFile1", Name: "directoryFile1"},
+		{Path: "imADirectory/directoryFile2", Name: "directoryFile1"},
+		{Path: "imADirectory/directoryFile3", Name: "directoryFile1"},
 	}
 	repository := StubRepository{}
 	repository.getObjects = func(path string) ([]Object, error) {
@@ -116,6 +116,9 @@ func TestItRendersFilesWhenTraversing(t *testing.T) {
 	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[0].Name)
 	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[1].Name)
 	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[2].Name)
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[0].Path)
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[1].Path)
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[2].Path)
 }
 
 func TestItReturnsTheContentOfTheFile(t *testing.T) {
@@ -126,12 +129,12 @@ func TestItReturnsTheContentOfTheFile(t *testing.T) {
 	repository.isFile = func(path string) bool {
 		return path == requestPath
 	}
-	repository.getObject = func(path string) []byte {
+	repository.getObject = func(path string) ([]byte, error) {
 		if path == requestPath {
-			return []byte(file1Content)
+			return []byte(file1Content), nil
 		}
 		t.Fatal("Should not get here")
-		return []byte("")
+		return []byte(""), nil
 	}
 
 	req, _ := http.NewRequest("GET", requestPath, nil)
@@ -161,3 +164,38 @@ func TestItReturnsAnyErrorFromGetObjects(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	assert.Contains(t, string(rr.Body.Bytes()), expectedError.Error())
 }
+
+func TestItReturnsAnyErrorFromGetObject(t *testing.T) {
+	expectedError := errors.New("nooooes")
+	filePath := "path/to/file"
+	repository := StubRepository{}
+
+	repository.isFile = func(path string) bool {
+		if path == filePath {
+			return true
+		}
+		t.Error("Should not get here")
+		return false
+	}
+
+	repository.getObject = func(path string) ([]byte, error) {
+		if path == filePath {
+			return nil, expectedError
+		}
+		t.Error("Should not get here")
+		return nil, nil
+
+	}
+
+	req, _ := http.NewRequest("GET", filePath, nil)
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(NewServer(repository).Handler)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
+	assert.Contains(t, string(rr.Body.Bytes()), expectedError.Error())
+
+}
+
+//Todo test getObject error case

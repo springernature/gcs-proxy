@@ -29,16 +29,18 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 	return template.Execute(w, objects)
 }
 
-func (s Server) writeFile(path string, w http.ResponseWriter) {
-	object := s.repository.GetObject(path)
-	w.Write(object)
-}
-
 func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	if path != "/" && s.repository.IsFile(path) {
-		w.Write(s.repository.GetObject(path))
+		object, err := s.repository.GetObject(path)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		w.Write(object)
 		return
 	}
 
@@ -47,7 +49,6 @@ func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
-
 		return
 	}
 	err = s.renderTemplate(objects, w)

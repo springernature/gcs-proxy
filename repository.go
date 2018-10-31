@@ -9,7 +9,7 @@ import (
 
 type ObjectRepository interface {
 	GetObjects(path string) (objects []Object, err error)
-	GetObject(path string) []byte
+	GetObject(path string) (objectContent []byte, err error)
 	IsFile(path string) bool
 }
 
@@ -28,7 +28,7 @@ func NewRepository(client *storage.Client) ObjectRepository {
 	}
 }
 
-func (repo) GetObject(path string) []byte {
+func (repo) GetObject(path string) (objectContent []byte, err error) {
 	panic("implement me")
 }
 
