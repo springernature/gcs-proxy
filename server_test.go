@@ -11,7 +11,7 @@ import (
 type StubRepository struct {
 	getObjects func(path string) ([]Object, error)
 	getObject  func(path string) ([]byte, error)
-	isFile     func(path string) bool
+	isFile     func(path string) (bool, error)
 }
 
 func (s StubRepository) GetObject(path string) ([]byte, error) {
@@ -22,9 +22,9 @@ func (s StubRepository) GetObject(path string) ([]byte, error) {
 
 }
 
-func (s StubRepository) IsFile(path string) bool {
+func (s StubRepository) IsFile(path string) (bool, error) {
 	if s.isFile == nil {
-		return false
+		return false, nil
 	}
 
 	return s.isFile(path)
@@ -126,8 +126,8 @@ func TestItReturnsTheContentOfTheFile(t *testing.T) {
 	file1Content := "imAFile"
 
 	repository := StubRepository{}
-	repository.isFile = func(path string) bool {
-		return path == requestPath
+	repository.isFile = func(path string) (bool, error) {
+		return path == requestPath, nil
 	}
 	repository.getObject = func(path string) ([]byte, error) {
 		if path == requestPath {
@@ -170,12 +170,12 @@ func TestItReturnsAnyErrorFromGetObject(t *testing.T) {
 	filePath := "path/to/file"
 	repository := StubRepository{}
 
-	repository.isFile = func(path string) bool {
+	repository.isFile = func(path string) (bool, error) {
 		if path == filePath {
-			return true
+			return true, nil
 		}
 		t.Error("Should not get here")
-		return false
+		return false, nil
 	}
 
 	repository.getObject = func(path string) ([]byte, error) {
@@ -198,4 +198,26 @@ func TestItReturnsAnyErrorFromGetObject(t *testing.T) {
 
 }
 
-//Todo test getObject error case
+func TestItReturnsAnyErrorFromIsFile(t *testing.T) {
+	expectedError := errors.New("nooooes")
+	filePath := "path/to/file"
+	repository := StubRepository{}
+
+	repository.isFile = func(path string) (bool, error) {
+		if path == filePath {
+			return false, expectedError
+		}
+		t.Error("Should not get here")
+		return false, nil
+	}
+
+	req, _ := http.NewRequest("GET", filePath, nil)
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(NewServer(repository).Handler)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
+	assert.Contains(t, string(rr.Body.Bytes()), expectedError.Error())
+
+}

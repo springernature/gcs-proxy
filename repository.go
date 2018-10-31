@@ -11,7 +11,7 @@ import (
 type ObjectRepository interface {
 	GetObjects(path string) (objects []Object, err error)
 	GetObject(path string) (objectContent []byte, err error)
-	IsFile(path string) bool
+	IsFile(path string) (isFile bool, err error)
 }
 
 type Object struct {
@@ -41,7 +41,7 @@ func (r repo) GetObject(path string) (objectContent []byte, err error) {
 	return ioutil.ReadAll(reader)
 }
 
-func (repo) IsFile(path string) bool {
+func (repo) IsFile(path string) (bool, error) {
 	panic("implement me")
 }
 

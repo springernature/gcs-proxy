@@ -32,31 +32,39 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
-	if path != "/" && s.repository.IsFile(path) {
-		object, err := s.repository.GetObject(path)
+	if path != "/" {
+		isFile, err := s.repository.IsFile(path)
 		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			handleError(err, w)
 			return
 		}
-		w.Write(object)
-		return
+		if isFile {
+			object, err := s.repository.GetObject(path)
+			if err != nil {
+				handleError(err, w)
+				return
+			}
+			w.Write(object)
+			return
+		}
 	}
 
 	objects, err := s.repository.GetObjects(path)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		handleError(err, w)
 		return
 	}
 	err = s.renderTemplate(objects, w)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		handleError(err, w)
 		return
 	}
+}
+
+func handleError(err error, w http.ResponseWriter) {
+	log.Error(err)
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(err.Error()))
 }
 
 func NewServer(repository ObjectRepository) Server {
