@@ -5,6 +5,7 @@ import (
 	"context"
 	"google.golang.org/api/iterator"
 	"strings"
+	"io/ioutil"
 )
 
 type ObjectRepository interface {
@@ -28,8 +29,16 @@ func NewRepository(client *storage.Client) ObjectRepository {
 	}
 }
 
-func (repo) GetObject(path string) (objectContent []byte, err error) {
-	panic("implement me")
+func (r repo) GetObject(path string) (objectContent []byte, err error) {
+	bh := r.client.Bucket("bucket")
+	oh := bh.Object(path)
+	reader, err := oh.NewReader(context.Background())
+	if err != nil {
+		return
+	}
+	defer reader.Close()
+
+	return ioutil.ReadAll(reader)
 }
 
 func (repo) IsFile(path string) bool {
