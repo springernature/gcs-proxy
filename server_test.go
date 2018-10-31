@@ -219,5 +219,4 @@ func TestItReturnsAnyErrorFromIsFile(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	assert.Contains(t, string(rr.Body.Bytes()), expectedError.Error())
-
 }

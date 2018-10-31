@@ -147,3 +147,35 @@ func TestGetObjectShouldReturnErrorIfFileNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, []byte(nil), object)
 }
+
+func TestIsFileShouldReturnsFalseIffFileNotFound(t *testing.T) {
+	path := "subPath/subPathAgain/file2"
+	var objects []fakestorage.Object
+
+	server := fakestorage.NewServer(objects)
+	client := server.Client()
+
+	repo := gcs_proxy.NewRepository(client)
+
+	isFile, err := repo.IsFile(path)
+	assert.NoError(t, err)
+	assert.False(t, isFile)
+}
+
+func TestIsFileShouldReturnTrueIfFileIsFound(t *testing.T) {
+	path := "subPath/subPathAgain/file2"
+	objects := []fakestorage.Object{
+		{BucketName: "bucket", Name: "file1"},
+		{BucketName: "bucket", Name: path},
+		{BucketName: "bucket", Name: "some/random/path/file3"},
+	}
+
+	server := fakestorage.NewServer(objects)
+	client := server.Client()
+
+	repo := gcs_proxy.NewRepository(client)
+
+	isFile, err := repo.IsFile(path)
+	assert.NoError(t, err)
+	assert.True(t, isFile)
+}

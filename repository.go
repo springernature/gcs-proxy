@@ -41,8 +41,17 @@ func (r repo) GetObject(path string) (objectContent []byte, err error) {
 	return ioutil.ReadAll(reader)
 }
 
-func (repo) IsFile(path string) (bool, error) {
-	panic("implement me")
+func (r repo) IsFile(path string) (bool, error) {
+	bh := r.client.Bucket("bucket")
+	oh := bh.Object(path)
+	_, err := oh.Attrs(context.Background())
+	if err == storage.ErrObjectNotExist {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (r repo) GetObjects(path string) (objects []Object, err error) {
