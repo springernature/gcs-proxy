@@ -20,17 +20,23 @@ type Object struct {
 }
 
 type repo struct {
+	bucket string
 	client *storage.Client
 }
 
-func NewRepository(client *storage.Client) ObjectRepository {
+func NewRepository(bucket string, client *storage.Client) ObjectRepository {
 	return repo{
+		bucket: bucket,
 		client: client,
 	}
 }
 
 func (r repo) GetObject(path string) (objectContent []byte, err error) {
-	bh := r.client.Bucket("bucket")
+	if strings.HasPrefix(path, "/") {
+		path = path[1:]
+	}
+
+	bh := r.client.Bucket(r.bucket)
 	oh := bh.Object(path)
 	reader, err := oh.NewReader(context.Background())
 	if err != nil {
@@ -42,29 +48,36 @@ func (r repo) GetObject(path string) (objectContent []byte, err error) {
 }
 
 func (r repo) IsFile(path string) (bool, error) {
-	bh := r.client.Bucket("bucket")
+	if strings.HasPrefix(path, "/") {
+		path = path[1:]
+	}
+
+	bh := r.client.Bucket(r.bucket)
 	oh := bh.Object(path)
-	_, err := oh.Attrs(context.Background())
+	oa, err := oh.Attrs(context.Background())
 	if err == storage.ErrObjectNotExist {
 		return false, nil
 	}
 	if err != nil {
 		return false, err
 	}
-	return true, nil
+	return oa.Name != "" && oa.Prefix == "", nil
 }
 
-func (r repo) GetObjects(path string) (objects []Object, err error) {
-	if path == "/" {
-		path = ""
-	} else if !strings.HasSuffix(path, "/") {
-		path += "/"
+func (r repo) GetObjects(objectPath string) (objects []Object, err error) {
+	if objectPath == "/" {
+		objectPath = ""
+	} else if !strings.HasSuffix(objectPath, "/") {
+		objectPath += "/"
+	}
+	if strings.HasPrefix(objectPath, "/") {
+		objectPath = objectPath[1:]
 	}
 
-	bh := r.client.Bucket("bucket")
+	bh := r.client.Bucket(r.bucket)
 	oi := bh.Objects(context.Background(), &storage.Query{
 		Delimiter: "/",
-		Prefix:    path,
+		Prefix:    objectPath,
 	})
 
 	for {
@@ -77,11 +90,28 @@ func (r repo) GetObjects(path string) (objects []Object, err error) {
 			return
 		}
 
-		numOfSlashes := len(strings.Split(attrs.Name, "/"))
-		name := strings.Split(attrs.Name, "/")[numOfSlashes-1]
+
+		var name string
+		var objPath string
+		if objectPath == "" || objectPath == "/" {
+			name = attrs.Prefix
+			objPath = attrs.Prefix
+		} else {
+			if attrs.Name == "" && attrs.Prefix != "" {
+				// This means directory
+				splitPrefix := strings.Split(attrs.Prefix, "/")
+				name = splitPrefix[len(splitPrefix)-2] + "/"
+				objPath = attrs.Prefix
+			} else {
+				numOfSlashes := len(strings.Split(attrs.Name, "/"))
+				name = strings.Split(attrs.Name, "/")[numOfSlashes-1]
+				objPath = attrs.Name
+			}
+		}
+
 		objects = append(objects, Object{
 			Name: name,
-			Path: attrs.Name,
+			Path: objPath,
 		})
 	}
 

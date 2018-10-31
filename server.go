@@ -15,8 +15,9 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 	template, err := t.Parse(`
 <html>
 	<body>
+		<a href="../">../</a></br>
 		{{range .}}
-			<a href="{{.Path}}">{{.Name}}</a>
+			<a href="/{{.Path}}">{{.Name}}</a></br>
 		{{end}}
 	</body>
 </html>
@@ -31,15 +32,18 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 
 func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
+	if path == "/favicon.ico" {
+		return
+	}
 
-	if path != "/" {
+		if path != "/" {
 		isFile, err := s.repository.IsFile(path)
-		if err != nil {
+				if err != nil {
 			handleError(err, w)
 			return
 		}
 		if isFile {
-			object, err := s.repository.GetObject(path)
+						object, err := s.repository.GetObject(path)
 			if err != nil {
 				handleError(err, w)
 				return
@@ -49,7 +53,7 @@ func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	objects, err := s.repository.GetObjects(path)
+		objects, err := s.repository.GetObjects(path)
 	if err != nil {
 		handleError(err, w)
 		return
