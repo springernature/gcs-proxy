@@ -2,21 +2,38 @@ package gcs_proxy
 
 import (
 	"net/http"
-	"fmt"
+	"html/template"
 )
 
 type Server struct {
 	repository ObjectRepository
 }
 
+func (s Server) renderTemplate(objects []string, w http.ResponseWriter) (err error) {
+	t := template.New("template")
+	template, err := t.Parse(`
+<html>
+	<body>
+		{{range .}}
+			<a href="{{.}}">{{.}}</a>
+		{{end}}
+	</body>
+</html>
+
+`)
+	if err != nil {
+		return
+	}
+
+	return template.Execute(w, objects)
+}
+
 func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 	objects := s.repository.GetObjects("")
-
-	var blah string
-	for _, object := range objects {
-		blah += fmt.Sprintf("%s\n", object)
+	err := s.renderTemplate(objects, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
-	w.Write([]byte(blah))
 }
 
 func NewServer(repository ObjectRepository) Server {

@@ -28,7 +28,6 @@ func TestItRespondsWithA200OnSlash(t *testing.T) {
 }
 
 func TestItRendersFiles(t *testing.T) {
-
 	files := []string{
 		"file1",
 		"file2",
