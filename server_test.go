@@ -48,9 +48,9 @@ func TestItRespondsWithA200OnSlash(t *testing.T) {
 
 func TestItRendersFiles(t *testing.T) {
 	files := []Object{
-		{Name: "file1"},
-		{Name: "file2"},
-		{Name: "file3"},
+		File{Name: "file1"},
+		File{Name: "file2"},
+		File{Name: "file3"},
 	}
 	repository := StubRepository{}
 	repository.getObjects = func(path string) ([]Object, error) {
@@ -64,24 +64,24 @@ func TestItRendersFiles(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
-	assert.Contains(t, string(rr.Body.Bytes()), files[0].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), files[1].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), files[2].Name)
+	assert.Contains(t, string(rr.Body.Bytes()), files[0].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), files[1].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), files[2].GetName())
 }
 
 func TestItRendersFilesWhenTraversing(t *testing.T) {
 	slashPath := "/"
 	slashFiles := []Object{
-		{Name: "file1"},
-		{Name: "file2"},
-		{Name: "imADirectory"},
+		File{Name: "file1"},
+		File{Name: "file2"},
+		Directory{Name: "imADirectory"},
 	}
 
 	directoryPath := "/imADirectory"
 	directoryFiles := []Object{
-		{Path: "imADirectory/directoryFile1", Name: "directoryFile1"},
-		{Path: "imADirectory/directoryFile2", Name: "directoryFile1"},
-		{Path: "imADirectory/directoryFile3", Name: "directoryFile1"},
+		File{Path: "imADirectory/directoryFile1", Name: "directoryFile1"},
+		File{Path: "imADirectory/directoryFile2", Name: "directoryFile1"},
+		File{Path: "imADirectory/directoryFile3", Name: "directoryFile1"},
 	}
 	repository := StubRepository{}
 	repository.getObjects = func(path string) ([]Object, error) {
@@ -102,9 +102,9 @@ func TestItRendersFilesWhenTraversing(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
-	assert.Contains(t, string(rr.Body.Bytes()), slashFiles[0].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), slashFiles[1].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), slashFiles[2].Name)
+	assert.Contains(t, string(rr.Body.Bytes()), slashFiles[0].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), slashFiles[1].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), slashFiles[2].GetName())
 
 	req, _ = http.NewRequest("GET", directoryPath, nil)
 	rr = httptest.NewRecorder()
@@ -113,12 +113,12 @@ func TestItRendersFilesWhenTraversing(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
-	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[0].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[1].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[2].Name)
-	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[0].Path)
-	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[1].Path)
-	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[2].Path)
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[0].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[1].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[2].GetName())
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[0].GetPath())
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[1].GetPath())
+	assert.Contains(t, string(rr.Body.Bytes()), directoryFiles[2].GetPath())
 }
 
 func TestItReturnsTheContentOfTheFile(t *testing.T) {

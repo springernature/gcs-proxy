@@ -33,9 +33,9 @@ func TestShouldReturnAllTheFoldersAtRoot(t *testing.T) {
 
 	objs, err := repo.GetObjects(path)
 	assert.NoError(t, err)
-	assert.Contains(t, objs, gcs_proxy.Object{Name: objects[0].Name, Path: objects[0].Name})
-	assert.Contains(t, objs, gcs_proxy.Object{Name: objects[1].Name, Path: objects[1].Name})
-	assert.Contains(t, objs, gcs_proxy.Object{Name: objects[2].Name, Path: objects[2].Name})
+	assert.Contains(t, objs, gcs_proxy.Directory{Name: objects[0].Name, Path: objects[0].Name})
+	assert.Contains(t, objs, gcs_proxy.Directory{Name: objects[1].Name, Path: objects[1].Name})
+	assert.Contains(t, objs, gcs_proxy.Directory{Name: objects[2].Name, Path: objects[2].Name})
 }
 
 func TestShouldReturnAllTheObjectsAtSomePath(t *testing.T) {
@@ -66,15 +66,15 @@ func TestShouldReturnAllTheObjectsAtSomePath(t *testing.T) {
 
 	objs, err := repo.GetObjects(path)
 	assert.NoError(t, err)
-	assert.Contains(t, objs, gcs_proxy.Object{
+	assert.Contains(t, objs, gcs_proxy.File{
 		Name: "file2",
 		Path: fmt.Sprintf("%s/file2", path),
 	})
-	assert.Contains(t, objs, gcs_proxy.Object{
+	assert.Contains(t, objs, gcs_proxy.File{
 		Name: "file3",
 		Path: fmt.Sprintf("%s/file3", path),
 	})
-	assert.Contains(t, objs, gcs_proxy.Object{
+	assert.Contains(t, objs, gcs_proxy.Directory{
 		Name: "subDirectory/",
 		Path: fmt.Sprintf("%s/subDirectory/", path),
 	})
@@ -104,11 +104,11 @@ func TestShouldReturnAllTheObjectsAtSomeEvenDeeperPath(t *testing.T) {
 
 	objs, err := repo.GetObjects(path)
 	assert.NoError(t, err)
-	assert.Contains(t, objs, gcs_proxy.Object{
+	assert.Contains(t, objs, gcs_proxy.File{
 		Name: "file2",
 		Path: fmt.Sprintf("%s/file2", path),
 	})
-	assert.Contains(t, objs, gcs_proxy.Object{
+	assert.Contains(t, objs, gcs_proxy.File{
 		Name: "file3",
 		Path: fmt.Sprintf("%s/file3", path),
 	})

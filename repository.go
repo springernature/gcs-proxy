@@ -14,11 +14,6 @@ type ObjectRepository interface {
 	IsFile(path string) (isFile bool, err error)
 }
 
-type Object struct {
-	Path string
-	Name string
-}
-
 type repo struct {
 	bucket string
 	client *storage.Client
@@ -90,23 +85,11 @@ func (r repo) GetObjects(objectPath string) (objects []Object, err error) {
 			return
 		}
 
-		var name string
-		var objPath string
-		if objectPath == "" || objectPath == "/" {
-			name = attrs.Prefix
-			objPath = attrs.Prefix
+		if isDirectory(attrs) {
+			objects = append(objects, createDirectoryObject(attrs))
 		} else {
-			if isDirectory(attrs) {
-				objects = append(objects, createDirectoryObject(attrs))
-			} else {
-				objects = append(objects, createFileObject(attrs))
-			}
+			objects = append(objects, createFileObject(attrs))
 		}
-
-		objects = append(objects, Object{
-			Name: name,
-			Path: objPath,
-		})
 	}
 
 	return
@@ -118,7 +101,7 @@ func isDirectory(attrs *storage.ObjectAttrs) bool {
 
 func createDirectoryObject(attrs *storage.ObjectAttrs) Object {
 	splitPrefix := strings.Split(attrs.Prefix, "/")
-	return Object{
+	return Directory{
 		Name: splitPrefix[len(splitPrefix)-2] + "/",
 		Path: attrs.Prefix,
 	}
@@ -126,7 +109,7 @@ func createDirectoryObject(attrs *storage.ObjectAttrs) Object {
 
 func createFileObject(attrs *storage.ObjectAttrs) Object {
 	numOfSlashes := len(strings.Split(attrs.Name, "/"))
-	return Object{
+	return File{
 		Name: strings.Split(attrs.Name, "/")[numOfSlashes-1],
 		Path: attrs.Name,
 	}
