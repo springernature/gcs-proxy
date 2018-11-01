@@ -16,5 +16,5 @@ tasks:
   vars:
     GCS_KEY: ((gcs-proxy.gcs-key))
     BUCKET: ((gcs-proxy.bucket))
-
+  deploy_artifact: cf
 
