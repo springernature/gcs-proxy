@@ -16,6 +16,9 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 	t := template.New("template")
 	template, err := t.Parse(`
 <html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/static/style.css">
+	</head>
 	<body>
 		<a href="../">../</a></br>
 		{{range .}}

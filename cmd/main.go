@@ -26,6 +26,11 @@ func createGcsClient(jsonKey string) (client *storage.Client, err error) {
 	return storage.NewClient(context.Background(), option.WithCredentials(credz))
 }
 
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/favicon.ico")
+}
+
+
 func main() {
 	bucket := os.Getenv("BUCKET")
 	if bucket == "" {
@@ -42,5 +47,7 @@ func main() {
 
 	log.Println("Yay, gonna start serving stuff")
 	http.HandleFunc("/", server.Handler)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/favicon.ico", faviconHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
