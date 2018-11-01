@@ -3,7 +3,7 @@ pipeline: gcs-proxy
 tasks:
 - type: run
   name: Test and build
-  script: \go test ./... ; go build -o cf/server cmd/main.go
+  script: \go test ./... ; go build -o cf/server cmd/main.go ; cp -r static cf
   docker:
     image: golang:1.11-stretch
   save_artifacts:
