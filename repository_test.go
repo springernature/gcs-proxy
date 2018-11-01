@@ -13,15 +13,15 @@ func TestShouldReturnAllTheFoldersAtRoot(t *testing.T) {
 	objects := []fakestorage.Object{
 		{
 			BucketName: bucket,
-			Name:       "folder1/",
+			Name:       "folder1/file1",
 		},
 		{
 			BucketName: bucket,
-			Name:       "folder2/",
+			Name:       "folder2/file2",
 		},
 		{
 			BucketName: bucket,
-			Name:       "folder3/",
+			Name:       "folder3/file3",
 		},
 	}
 
@@ -33,9 +33,9 @@ func TestShouldReturnAllTheFoldersAtRoot(t *testing.T) {
 
 	objs, err := repo.GetObjects(path)
 	assert.NoError(t, err)
-	assert.Contains(t, objs, gcs_proxy.Directory{Name: objects[0].Name, Path: objects[0].Name})
-	assert.Contains(t, objs, gcs_proxy.Directory{Name: objects[1].Name, Path: objects[1].Name})
-	assert.Contains(t, objs, gcs_proxy.Directory{Name: objects[2].Name, Path: objects[2].Name})
+	assert.Contains(t, objs, gcs_proxy.Directory{Name: "folder1", Path: "folder1/"})
+	assert.Contains(t, objs, gcs_proxy.Directory{Name: "folder2", Path: "folder2/"})
+	assert.Contains(t, objs, gcs_proxy.Directory{Name: "folder3", Path: "folder3/"})
 }
 
 func TestShouldReturnAllTheObjectsAtSomePath(t *testing.T) {
@@ -75,7 +75,7 @@ func TestShouldReturnAllTheObjectsAtSomePath(t *testing.T) {
 		Path: fmt.Sprintf("%s/file3", path),
 	})
 	assert.Contains(t, objs, gcs_proxy.Directory{
-		Name: "subDirectory/",
+		Name: "subDirectory",
 		Path: fmt.Sprintf("%s/subDirectory/", path),
 	})
 }
