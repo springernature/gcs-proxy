@@ -147,6 +147,33 @@ func TestItReturnsTheContentOfTheFile(t *testing.T) {
 	assert.Equal(t, string(rr.Body.Bytes()), file1Content)
 }
 
+func TestItReturnsTheRightContentTypeOfTheFile(t *testing.T) {
+	requestPath := "/file1.html"
+	file1Content := "imAFile"
+
+	repository := StubRepository{}
+	repository.isFile = func(path string) (bool, error) {
+		return path == requestPath, nil
+	}
+	repository.getObject = func(path string) ([]byte, error) {
+		if path == requestPath {
+			return []byte(file1Content), nil
+		}
+		t.Fatal("Should not get here")
+		return []byte(""), nil
+	}
+
+	req, _ := http.NewRequest("GET", requestPath, nil)
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(NewServer(repository).Handler)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
+	assert.Equal(t, "text/html; charset=utf-8", rr.Result().Header.Get("Content-Type"))
+	assert.Equal(t, string(rr.Body.Bytes()), file1Content)
+}
+
 func TestItReturnsAnyErrorFromGetObjects(t *testing.T) {
 	expectedError := errors.New("nooooes")
 

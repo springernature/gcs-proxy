@@ -1,16 +1,17 @@
 package main
 
 import (
-	"net/http"
-	"github.com/springernature/gcs-proxy"
-	"log"
-	"os"
 	"cloud.google.com/go/storage"
 	"context"
+	"github.com/springernature/gcs-proxy"
+	"log"
+	"net/http"
+	"os"
 )
 
 func main() {
 	bucket := os.Getenv("BUCKET")
+
 	client, err := storage.NewClient(context.Background())
 	if err != nil {
 		log.Fatal(err)
