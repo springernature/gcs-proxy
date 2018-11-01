@@ -102,7 +102,7 @@ func isDirectory(attrs *storage.ObjectAttrs) bool {
 func createDirectoryObject(attrs *storage.ObjectAttrs) Object {
 	splitPrefix := strings.Split(attrs.Prefix, "/")
 	return Directory{
-		Name: splitPrefix[len(splitPrefix)-2] + "/",
+		Name: splitPrefix[len(splitPrefix)-2],
 		Path: attrs.Prefix,
 	}
 }

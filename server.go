@@ -1,11 +1,11 @@
 package gcs_proxy
 
 import (
-	"github.com/JFrogDev/jfrog-cli-go/jfrog-client/utils/log"
 	"html/template"
 	"mime"
 	"net/http"
 	"path"
+	"log"
 )
 
 type Server struct {
@@ -19,7 +19,7 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 	<body>
 		<a href="../">../</a></br>
 		{{range .}}
-			<a href="/{{.Path}}">{{.Name}}</a></br>
+			<a href="/{{.GetPath}}">{{.GetName}}</a></br>
 		{{end}}
 	</body>
 </html>
@@ -34,9 +34,11 @@ func (s Server) renderTemplate(objects []Object, w http.ResponseWriter) (err err
 
 func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 	objPath := r.URL.Path
+
 	if objPath == "/favicon.ico" {
 		return
 	}
+	log.Println("Handling request for: ", objPath)
 
 	if objPath != "/" {
 		isFile, err := s.repository.IsFile(objPath)
@@ -76,7 +78,7 @@ func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleError(err error, w http.ResponseWriter) {
-	log.Error(err)
+	log.Print("Shieeet, got an error:", err)
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(err.Error()))
 }

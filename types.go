@@ -24,7 +24,7 @@ type Directory struct {
 }
 
 func (d Directory) GetName() string {
-	return d.Name
+	return d.Name + "/"
 }
 
 func (d Directory) GetPath() string {

@@ -7,17 +7,40 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
+
+func createGcsClient(jsonKey string) (client *storage.Client, err error) {
+	if jsonKey == "" {
+		log.Println("No jsonKey provided via env var, gonna try to use credz from the FS")
+		return storage.NewClient(context.Background())
+	}
+	log.Println("jsonKey provided via env var, gonna try to use that")
+
+
+	credz, err := google.CredentialsFromJSON(context.Background(), []byte(jsonKey), storage.ScopeReadOnly)
+	if err != nil {
+		return
+	}
+	return storage.NewClient(context.Background(), option.WithCredentials(credz))
+}
 
 func main() {
 	bucket := os.Getenv("BUCKET")
+	if bucket == "" {
+		log.Fatal("HEY! You need to specify the bucket you want to proxy via env var BUCKET")
+	}
+	gcsKey := os.Getenv("GCS_KEY")
 
-	client, err := storage.NewClient(context.Background())
+	client, err := createGcsClient(gcsKey)
 	if err != nil {
 		log.Fatal(err)
 	}
 	or := gcs_proxy.NewRepository(bucket, client)
 	server := gcs_proxy.NewServer(or)
+
+	log.Println("Yay, gonna start serving stuff")
 	http.HandleFunc("/", server.Handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
