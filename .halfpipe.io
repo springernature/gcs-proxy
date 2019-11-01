@@ -1,5 +1,9 @@
 team: engineering-enablement
 pipeline: gcs-proxy
+
+feature_toggles:
+- update-pipeline
+
 tasks:
 - type: run
   name: Test and build

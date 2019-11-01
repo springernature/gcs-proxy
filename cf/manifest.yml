@@ -2,5 +2,6 @@
 applications:
 - name: gcs-proxy
   buildpack: binary_buildpack
+  stack: cflinuxfs3
   routes:
   - route: gcs-proxy.springernature.app
