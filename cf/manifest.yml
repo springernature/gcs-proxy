@@ -3,7 +3,7 @@ applications:
 - name: gcs-proxy
   buildpack: binary_buildpack
   stack: cflinuxfs3
-  memory: 100M
+  memory: 500M
   instances: 2
   routes:
   - route: gcs-proxy.springernature.app
