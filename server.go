@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path"
 	"log"
+	"strings"
 )
 
 type Server struct {
@@ -43,7 +44,7 @@ func (s Server) Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Handling request for: ", objPath)
 
-	if objPath != "/" {
+	if objPath != "/" && !strings.HasSuffix(objPath,"/") {
 		isFile, err := s.repository.IsFile(objPath)
 		if err != nil {
 			handleError(err, w)
