@@ -18,7 +18,7 @@ tasks:
   space: halfpipe
   manifest: cf/manifest.yml
   vars:
-    GCS_KEY: ((gcs-proxy.gcs-key))
-    BUCKET: ((gcs-proxy.bucket))
+    GCS_KEY: ((gcs-proxy-prod.gcs-key))
+    BUCKET: ((gcs-proxy-prod.bucket))
   deploy_artifact: cf
 
