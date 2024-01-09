@@ -10,7 +10,7 @@ tasks:
   name: Test and build
   script: \go test ./... && go build -o cf/server cmd/main.go && cp -r static cf
   docker:
-    image: golang:1.21-stretch
+    image: golang:1.21-bullseye
   save_artifacts:
   - cf
 
