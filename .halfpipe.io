@@ -1,5 +1,6 @@
 team: engineering-enablement
 pipeline: gcs-proxy
+slack_channel: '#ee-release-engineering'
 
 feature_toggles:
 - update-pipeline
@@ -18,7 +19,7 @@ tasks:
   space: halfpipe
   manifest: cf/manifest.yml
   vars:
-    GCS_KEY: ((gcs-proxy-prod.gcs-key))
-    BUCKET: ((gcs-proxy-prod.bucket))
+    GCS_KEY: ((gcs-proxy.gcs-key))
+    BUCKET: ((gcs-proxy.bucket))
   deploy_artifact: cf
 
