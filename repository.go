@@ -4,8 +4,8 @@ import (
 	"cloud.google.com/go/storage"
 	"context"
 	"google.golang.org/api/iterator"
+	"io"
 	"strings"
-	"io/ioutil"
 )
 
 type ObjectRepository interface {
@@ -39,7 +39,7 @@ func (r repo) GetObject(path string) (objectContent []byte, err error) {
 	}
 	defer reader.Close()
 
-	return ioutil.ReadAll(reader)
+	return io.ReadAll(reader)
 }
 
 func (r repo) IsFile(path string) (bool, error) {
