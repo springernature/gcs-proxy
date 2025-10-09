@@ -1,13 +1,13 @@
 module github.com/springernature/gcs-proxy
 
-go 1.24
+go 1.24.0
 
 toolchain go1.24.2
 
 require (
 	cloud.google.com/go/storage v1.56.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/oauth2 v0.32.0
 	google.golang.org/api v0.243.0
 )
 
