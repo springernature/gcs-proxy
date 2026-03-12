@@ -7,4 +7,9 @@ component:
   owner: engineering-enablement
   language: go
   lifecycle: core
-  tier: mission-critical
+  tier: Internal-Only
+  properties:
+    cloud_foundry_apps:
+      - cf_engineering-enablement_halfpipe_gcs-proxy
+    pipelines:
+      - concourse_engineering-enablement_gcs-proxy_7255
