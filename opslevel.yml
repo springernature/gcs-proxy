@@ -1,0 +1,10 @@
+version: 1
+component:
+  name: GCS Proxy
+  description: Google Cloud Storage proxy which supports file listing
+  type: application_module
+  system: APPL-437
+  owner: engineering-enablement
+  language: go
+  lifecycle: core
+  tier: mission-critical
