@@ -13,3 +13,7 @@ component:
       - cf_engineering-enablement_halfpipe_gcs-proxy
     pipelines:
       - concourse_engineering-enablement_gcs-proxy_7255
+  tools:
+    - category: issue_tracking
+      name: GitHub
+      url: https://github.com/springernature/gcs-proxy/issues
